@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kalkulator Eliminasi Matriks 3×3 – Gauss-Jordan</title>
+<style>
+    body { font-family: Arial; margin: 20px; }
+    input { width: 60px; }
+    .matrix-row { margin-bottom: 5px; }
+    button { margin-top: 10px; }
+    #output { margin-top: 20px; white-space: pre-wrap; background: #f3f3f3; padding: 10px; }
+</style>
+</head>
+<body>
+
+<h2>Kalkulator Matriks 3×3 – Gauss-Jordan</h2>
+
+<label>Pembulatan tampilan: </label>
+<select id="mode">
+    <option value="koma">1 angka di belakang koma</option>
+    <option value="bulat">Tanpa koma (pembulatan bilangan bulat)</option>
+</select>
+
+<br><br>
+
+<div>
+    <div class="matrix-row">
+        <input id="a11"> <input id="a12"> <input id="a13"> <span>|</span> <input id="b1">
+    </div>
+    <div class="matrix-row">
+        <input id="a21"> <input id="a22"> <input id="a23"> <span>|</span> <input id="b2">
+    </div>
+    <div class="matrix-row">
+        <input id="a31"> <input id="a32"> <input id="a33"> <span>|</span> <input id="b3">
+    </div>
+</div>
+
+<button onclick="gaussJordan()">Proses Gauss-Jordan Lengkap</button>
+
+<div id="output"></div>
+
+<script>
+function readMatrix() {
+    function val(x){ return parseFloat(x) || 0; }
+    return [
+        [val(a11.value), val(a12.value), val(a13.value), val(b1.value)],
+        [val(a21.value), val(a22.value), val(a23.value), val(b2.value)],
+        [val(a31.value), val(a32.value), val(a33.value), val(b3.value)]
+    ];
+}
+
+// === fungsi format berdasarkan pilihan mode ===
+function fmt(value) {
+    let mode = document.getElementById("mode").value;
+    if (mode === "koma") return value.toFixed(1);   // 1 angka di belakang koma
+    return Math.round(value).toString();             // tanpa koma
+}
+
+function formatMatrix(M) {
+    return M.map(r => r.map(v => fmt(v)).join("\t")).join("\n");
+}
+
+function gaussJordan() {
+    let M = readMatrix();
+    let steps = "=== GAUSS-JORDAN 3×3 ===\n\nMatriks awal:\n" + formatMatrix(M) + "\n\n";
+
+    // --- Pivot 1 ---
+    let p1 = M[0][0];
+    for (let j=0;j<4;j++) M[0][j] /= p1;
+    steps += "Normalisasi pivot 1:\n" + formatMatrix(M) + "\n\n";
+
+    for (let i=1;i<3;i++){
+        let f = M[i][0];
+        for (let j=0;j<4;j++) M[i][j] -= f * M[0][j];
+    }
+    steps += "Nol-kan kolom 1:\n" + formatMatrix(M) + "\n\n";
+
+    // --- Pivot 2 ---
+    let p2 = M[1][1];
+    for (let j=0;j<4;j++) M[1][j] /= p2;
+    steps += "Normalisasi pivot 2:\n" + formatMatrix(M) + "\n\n";
+
+    let f02 = M[0][1];
+    let f22 = M[2][1];
+    for (let j=0;j<4;j++){
+        M[0][j] -= f02 * M[1][j];
+        M[2][j] -= f22 * M[1][j];
+    }
+    steps += "Nol-kan kolom 2:\n" + formatMatrix(M) + "\n\n";
+
+    // --- Pivot 3 ---
+    let p3 = M[2][2];
+    for (let j=0;j<4;j++) M[2][j] /= p3;
+    steps += "Normalisasi pivot 3:\n" + formatMatrix(M) + "\n\n";
+
+    let f03 = M[0][2];
+    let f13 = M[1][2];
+    for (let j=0;j<4;j++){
+        M[0][j] -= f03 * M[2][j];
+        M[1][j] -= f13 * M[2][j];
+    }
+    steps += "Nol-kan kolom 3:\n" + formatMatrix(M) + "\n\n";
+
+    steps += "=== Matriks RREF ===\n" + formatMatrix(M) + "\n\n";
+
+    steps += "Solusi:\n";
+    steps += "x1 = " + fmt(M[0][3]) + "\n";
+    steps += "x2 = " + fmt(M[1][3]) + "\n";
+    steps += "x3 = " + fmt(M[2][3]) + "\n";
+
+    output.textContent = steps;
+}
+</script>
+
+</body>
+</html>
